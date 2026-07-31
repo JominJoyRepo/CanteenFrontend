@@ -72,6 +72,20 @@ interface CategoryDisplay {
                 </mat-card-content>
               </mat-card>
             </div>
+
+            <div class="save-day-container" *ngIf="!loading">
+              <button
+                mat-flat-button
+                color="primary"
+                class="save-day-btn"
+                (click)="saveDay()"
+                [disabled]="savingDay"
+              >
+                <mat-icon>save_alt</mat-icon>
+                {{ savingDay ? 'Saving...' : 'Save Day' }}
+              </button>
+              <p class="save-day-hint">Saves all categories for this day</p>
+            </div>
           </ng-template>
         </mat-tab>
 
@@ -312,6 +326,27 @@ interface CategoryDisplay {
       gap: 8px;
       border-radius: 12px;
     }
+
+    .save-day-container {
+      margin-top: 16px;
+      text-align: center;
+    }
+    .save-day-btn {
+      width: 100%;
+      max-width: 568px;
+      height: 50px;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border-radius: 12px;
+    }
+    .save-day-hint {
+      font-size: 11px;
+      color: #999;
+      margin: 6px 0 0;
+    }
   `]
 })
 export class CategoryListComponent implements OnInit, OnDestroy {
@@ -323,6 +358,7 @@ export class CategoryListComponent implements OnInit, OnDestroy {
   cashOut: number | null = null;
   cardSale: number | null = null;
   savingSummary = false;
+  savingDay = false;
   private dateSub: Subscription | null = null;
 
   readonly otherCategory = { id: 'other', name: 'Other Items' };
@@ -476,6 +512,34 @@ export class CategoryListComponent implements OnInit, OnDestroy {
     const m = String(date.getMonth() + 1).padStart(2, '0');
     const d = String(date.getDate()).padStart(2, '0');
     return `${y}-${m}-${d}`;
+  }
+
+  saveDay() {
+    const dateStr = this.formatDate(this.selectedDate);
+    const entries = this.categoriesWithItems.map(cat => ({
+      categoryId: cat.id,
+      categoryName: cat.name,
+      items: cat.items.map(i => ({
+        id: i.id,
+        name: i.name,
+        unit: i.unit,
+        openStock: i.openStock,
+        closedStock: i.closedStock,
+        price: i.price
+      }))
+    }));
+    this.savingDay = true;
+    this.api.saveDayRecord(this.storeId, dateStr, entries).subscribe({
+      next: () => {
+        this.snackBar.open('Day saved!', 'OK', { duration: 2000 });
+        this.savingDay = false;
+        this.loadData();
+      },
+      error: () => {
+        this.snackBar.open('Failed to save. Try again.', 'OK', { duration: 3000 });
+        this.savingDay = false;
+      }
+    });
   }
 
   saveSummary() {

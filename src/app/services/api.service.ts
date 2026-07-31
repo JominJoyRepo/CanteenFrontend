@@ -40,6 +40,10 @@ export class ApiService {
     return this.http.put(`${this.base}/records/${date}`, { storeId, categoryId, items });
   }
 
+  saveDayRecord(storeId: string, date: string, entries: any[]): Observable<any> {
+    return this.http.put(`${this.base}/records/${date}/day`, { storeId, entries });
+  }
+
   getAvailableDates(storeId: string): Observable<string[]> {
     const params = new HttpParams().set('storeId', storeId);
     return this.http.get<string[]>(`${this.base}/records/dates`, { params });
