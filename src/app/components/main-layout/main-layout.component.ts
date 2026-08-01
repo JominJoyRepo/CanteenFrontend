@@ -159,7 +159,7 @@ export class MainLayoutComponent implements OnInit {
 
   get formattedDate(): string {
     return this.selectedDate.toLocaleDateString('en-US', {
-      month: 'short', day: 'numeric', year: 'numeric'
+      month: 'short', day: 'numeric'
     });
   }
 
