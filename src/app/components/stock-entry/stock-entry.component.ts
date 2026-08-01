@@ -77,7 +77,7 @@ import { StockEntry } from '../../models/models';
               </mat-form-field>
               <mat-form-field appearance="outline" class="stock-input">
                 <mat-label>Closed Stock</mat-label>
-                <input matInput type="number" min="0" [(ngModel)]="item.closedStock" placeholder="0">
+                <input matInput type="number" min="0" [(ngModel)]="item.closedStock" placeholder="0" (blur)="onClosedStockBlur(item)">
               </mat-form-field>
             </div>
           </mat-card-content>
@@ -431,13 +431,19 @@ export class StockEntryComponent implements OnInit {
     this.stockItems.splice(index, 1);
   }
 
+  onClosedStockBlur(item: StockEntry) {
+    if (item.closedStock == null) {
+      item.closedStock = 0;
+    }
+  }
+
   submit() {
     let itemsToSave = this.stockItems.map(i => ({
       id: i.id,
       name: i.name,
       unit: i.unit,
       openStock: i.openStock,
-      closedStock: i.closedStock,
+      closedStock: i.closedStock ?? 0,
       price: i.price
     }));
     if (this.isOtherCategory) {
