@@ -25,10 +25,6 @@ import { filter } from 'rxjs/operators';
   template: `
     <div class="layout">
       <mat-toolbar color="primary" class="toolbar">
-        <button mat-icon-button (click)="goHome()" aria-label="Home">
-          <mat-icon>store</mat-icon>
-        </button>
-
         <button mat-button [matMenuTriggerFor]="storeMenu" class="store-btn">
           <span class="store-label">{{ currentStoreName }}</span>
           <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
@@ -201,12 +197,6 @@ export class MainLayoutComponent implements OnInit {
       this.router.navigate(['/', storeId, ...segments.slice(1)]);
     } else {
       this.router.navigate(['/', storeId]);
-    }
-  }
-
-  goHome() {
-    if (this.currentStoreId) {
-      this.router.navigate(['/', this.currentStoreId]);
     }
   }
 
