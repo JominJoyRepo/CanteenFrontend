@@ -72,20 +72,6 @@ interface CategoryDisplay {
                 </mat-card-content>
               </mat-card>
             </div>
-
-            <div class="save-day-container" *ngIf="!loading">
-              <button
-                mat-flat-button
-                color="primary"
-                class="save-day-btn"
-                (click)="saveDay()"
-                [disabled]="savingDay"
-              >
-                <mat-icon>save_alt</mat-icon>
-                {{ savingDay ? 'Saving...' : 'Save Day' }}
-              </button>
-              <p class="save-day-hint">Saves all categories for this day</p>
-            </div>
           </ng-template>
         </mat-tab>
 
@@ -118,26 +104,31 @@ interface CategoryDisplay {
                   <input class="field-input" type="number" min="0" [(ngModel)]="cardSale" placeholder="0">
                 </div>
               </div>
-
-              <button
-                mat-flat-button
-                color="primary"
-                class="save-btn"
-                (click)="saveSummary()"
-                [disabled]="savingSummary"
-              >
-                <mat-icon>save</mat-icon>
-                {{ savingSummary ? 'Saving...' : 'Save Summary' }}
-              </button>
             </div>
           </ng-template>
         </mat-tab>
       </mat-tab-group>
+
+      <div class="save-day-container" *ngIf="!loading">
+        <button
+          mat-flat-button
+          color="primary"
+          class="save-day-btn"
+          (click)="activeTab === 0 ? saveDay() : saveSummary()"
+          [disabled]="activeTab === 0 ? savingDay : savingSummary"
+        >
+          <mat-icon>save_alt</mat-icon>
+          {{ activeTab === 0
+            ? (savingDay ? 'Saving...' : 'Save Day')
+            : (savingSummary ? 'Saving...' : 'Save Summary') }}
+        </button>
+        <p class="save-day-hint">{{ activeTab === 0 ? 'Saves all categories for this day' : 'Saves cash in, cash out & card sale for this day' }}</p>
+      </div>
     </div>
   `,
   styles: [`
     .category-page {
-      padding: 12px 16px;
+      padding: 12px 16px 100px;
       max-width: 600px;
       margin: 0 auto;
     }
@@ -316,24 +307,20 @@ interface CategoryDisplay {
     .field-input:focus {
       border-color: #1976d2;
     }
-    .save-btn {
-      width: 100%;
-      height: 50px;
-      font-size: 15px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      border-radius: 12px;
-    }
-
     .save-day-container {
-      margin-top: 16px;
-      text-align: center;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 12px 16px;
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+      background: linear-gradient(transparent, #f5f5f5 30%);
+      z-index: 100;
     }
     .save-day-btn {
       width: 100%;
       max-width: 568px;
+      margin: 0 auto;
       height: 50px;
       font-size: 15px;
       display: flex;
@@ -346,6 +333,7 @@ interface CategoryDisplay {
       font-size: 11px;
       color: #999;
       margin: 6px 0 0;
+      text-align: center;
     }
   `]
 })
@@ -359,6 +347,7 @@ export class CategoryListComponent implements OnInit, OnDestroy {
   cardSale: number | null = null;
   savingSummary = false;
   savingDay = false;
+  activeTab = 0;
   private dateSub: Subscription | null = null;
 
   readonly otherCategory = { id: 'other', name: 'Other Items' };
@@ -481,6 +470,7 @@ export class CategoryListComponent implements OnInit, OnDestroy {
   }
 
   onTabChange(event: any) {
+    this.activeTab = event.index;
     if (event.index === 1) {
       const dateStr = this.formatDate(this.selectedDate);
       this.api.getRecords(this.storeId, dateStr).subscribe(record => {
