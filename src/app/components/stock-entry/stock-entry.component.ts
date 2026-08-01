@@ -73,7 +73,7 @@ import { StockEntry } from '../../models/models';
             <div class="input-row">
               <mat-form-field appearance="outline" class="stock-input">
                 <mat-label>Open Stock</mat-label>
-                <input matInput type="number" min="0" [(ngModel)]="item.openStock" placeholder="0">
+                <input matInput type="number" min="0" [(ngModel)]="item.openStock" placeholder="0" (blur)="onOpenStockBlur(item)">
               </mat-form-field>
               <mat-form-field appearance="outline" class="stock-input">
                 <mat-label>Closed Stock</mat-label>
@@ -437,12 +437,18 @@ export class StockEntryComponent implements OnInit {
     }
   }
 
+  onOpenStockBlur(item: StockEntry) {
+    if (item.openStock == null) {
+      item.openStock = 0;
+    }
+  }
+
   submit() {
     let itemsToSave = this.stockItems.map(i => ({
       id: i.id,
       name: i.name,
       unit: i.unit,
-      openStock: i.openStock,
+      openStock: i.openStock ?? 0,
       closedStock: i.closedStock ?? 0,
       price: i.price
     }));
